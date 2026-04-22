@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost&Found City — Табылған заттар бюросы</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            background: #0a0a0a;
+        }
+
+        /* ================== SECTIONS ================== */
+        .section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 60px 20px;
+            scroll-snap-align: start;
+        }
+
+        /* ================== SECTION 1: HERO ================== */
+        #hero {
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
+                        url('https://img.forbes.kz/forbes-photobank/media/2024-06-08/dbaaf817-2600-4844-a2df-855ea35f097f.webp');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            text-align: center;
+        }
+
+        #hero h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 20px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+        }
+
+        #hero .subtitle {
+            font-size: 1.4rem;
+            font-weight: 300;
+            max-width: 800px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 10px rgba(0,0,0,0.9);
+        }
+
+        #hero .highlight {
+            color: #00d4aa;
+            font-weight: 700;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+
+        .scroll-down svg {
+            width: 40px;
+            height: 40px;
+            stroke: #fff;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-8px); }
+        }
+
+        /* ================== SECTION 2: PROBLEM ================== */
+        #problem {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #00d4aa;
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 320px;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: #00d4aa;
+            box-shadow: 0 20px 40px rgba(0,212,170,0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #00d4aa;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ccc;
+        }
+
+        /* ================== SECTION 3: MAP ================== */
+        #map-section {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                        url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        #map-section .section-title {
+            margin-bottom: 20px;
+        }
+
+        .map-description {
+            font-size: 1.1rem;
+            max-width: 700px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ddd;
+            line-height: 1.7;
+        }
+
+        #map {
+            width: 90%;
+            max-width: 1100px;
+            height: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.1);
+            z-index: 1;
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 25px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        /* ================== SECTION 4: SOLUTION ================== */
+        #solution {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .solution-item {
+            background: rgba(0,0,0,0.3);
+            border-left: 4px solid #00d4aa;
+            padding: 30px;
+            border-radius: 0 15px 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .solution-item:hover {
+            background: rgba(0,212,170,0.1);
+            transform: translateX(10px);
+        }
+
+        .solution-item h3 {
+            color: #00d4aa;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .solution-item p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ddd;
+        }
+
+        /* ================== SECTION 5: IMPACT ================== */
+        #impact {
+            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
+                        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            min-width: 200px;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #00d4aa;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            margin-top: 10px;
+            color: #ccc;
+        }
+
+        .impact-text {
+            max-width: 800px;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #ddd;
+        }
+
+        .impact-text ul {
+            list-style: none;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .impact-text ul li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .impact-text ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00d4aa;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* ================== SECTION 6: TEAM ================== */
+        #team {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .team-grid {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+        }
+
+        .team-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 35px 25px;
+            width: 200px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: scale(1.05);
+            border-color: #00d4aa;
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4aa, #008f6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 15px;
+        }
+
+        .team-card h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        /* ================== SECTION 7: CONTACT ================== */
+        #contact {
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
+                        url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .contact-box {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .contact-box h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .contact-box p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #00d4aa, #008f6b);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,212,170,0.3);
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        /* ================== NAVIGATION DOTS ================== */
+        .nav-dots {
+            position: fixed;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-dot.active {
+            background: #00d4aa;
+            transform: scale(1.3);
+            border-color: #fff;
+        }
+
+        .nav-dot:hover {
+            background: #00d4aa;
+        }
+
+        /* ================== RESPONSIVE ================== */
+        @media (max-width: 768px) {
+            #hero h1 {
+                font-size: 2.5rem;
+            }
+
+            #hero .subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 350px;
+            }
+
+            #map {
+                height: 350px;
+                width: 95%;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .nav-dots {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots">
+        <div class="nav-dot active" onclick="scrollToSection(0)"></div>
+        <div class="nav-dot" onclick="scrollToSection(1)"></div>
+        <div class="nav-dot" onclick="scrollToSection(2)"></div>
+        <div class="nav-dot" onclick="scrollToSection(3)"></div>
+        <div class="nav-dot" onclick="scrollToSection(4)"></div>
+        <div class="nav-dot" onclick="scrollToSection(5)"></div>
+        <div class="nav-dot" onclick="scrollToSection(6)"></div>
+    </div>
+
+    <!-- SECTION 1: HERO -->
+    <section class="section" id="hero">
+        <h1>Lost&Found City</h1>
+        <p class="subtitle">
+            Табылған заттар бюросы. <span class="highlight">Lost&Found City</span> — бұл жоғалған заттарды иесіне қайтаруға арналған заманауи цифрлық платформа.
+            Біз қала тұрғындарының бір-біріне деген қамқорлығын көрсететін әлеуметтік құрал құрамыз.
+        </p>
+        <div class="scroll-down" onclick="scrollToSection(1)">
+            <svg viewBox="0 0 24 24"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+        </div>
+    </section>
+
+    <!-- SECTION 2: PROBLEM -->
+    <section class="section" id="problem">
+        <h2 class="section-title">Мәселенің өзектілігі</h2>
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-icon">📱</div>
+                <h3>Ақпарат шашыраңқылығы</h3>
+                <p>Әлеуметтік желілердегі хабарландырулар тез жоғалып кетеді. Instagram, Telegram-дағы посттар уақыт өте келе көмескіленеді.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚔</div>
+                <h3>Полицияға бармау</h3>
+                <p>Халықтың көпшілігі құжаттарын жоғалтқанда полицияға бармайды. Бұл табылған заттардың иесіне қайту көрсеткішін төмендетеді.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">😟</div>
+                <h3>Сенімсіздік</h3>
+                <p>Адамдар тапқан затын қайтаруға сенімсіздік танытады. Қоғамда өзара көмек көрсету мәдениеті нашар дамыған.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: MAP -->
+    <section class="section" id="map-section">
+        <h2 class="section-title">Қайда тапсыруға болады?</h2>
+        <p class="map-description">
+            Алматы қаласында қайта өңдеу пункттерін және заттарды тапсыру орындарын карта арқылы табуға болады.
+            Картада жоғалған және табылған заттардың орналасқан жері белгіленген.
+        </p>
+        <div id="map"></div>
+        <div class="map-legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#e74c3c;"></div>
+                <span>Жоғалған заттар</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#2ecc71;"></div>
+                <span>Табылған заттар</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#3498db;"></div>
+                <span>Тапсыру пункттері</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#f39c12;"></div>
+                <span>Полиция бөлімдері</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: SOLUTION -->
+    <section class="section" id="solution">
+        <h2 class="section-title">Шешу жолдары</h2>
+        <div class="solution-grid">
+            <div class="solution-item">
+                <h3>📊 Бірыңғай база</h3>
+                <p>Барлық жоғалған және табылған заттар бір жерде жинақталып, санаттарға бөлінеді: құжаттар, жануарлар, техника, басқа да заттар.</p>
+            </div>
+            <div class="solution-item">
+                <h3>📍 Геолокациялық сүзгі</h3>
+                <p>Пайдаланушы карта арқылы заттың қай ауданда табылғанын нақты көре алады. Алматы қаласының барлық аудандары қамтылған.</p>
+            </div>
+            <div class="solution-item">
+                <h3>🔒 Верификация жүйесі</h3>
+                <p>Заттың шын иесі екенін дәлелдеу үшін арнайы сұрақтар мен көмескіленген суреттер жүйесі қолданылады — қауіпсіздік мақсатында.</p>
+            </div>
+            <div class="solution-item">
+                <h3>🏛️ Мемлекеттік интеграция</h3>
+                <p>Болашақта eGov немесе полиция базасымен бірігу мүмкіндігі. Табылған құжаттарды бірден иесіне қайтару.</p>
+            </div>
+            <div class="solution-item">
+                <h3>🤝 Қайырымдылық</h3>
+                <p>Адамдар тапқан затын иесіне қайтару арқылы жауапты азаматтық позициясын көрсетеді. Қоғамдық сенімді арттыру.</p>
+            </div>
+            <div class="solution-item">
+                <h3>💰 Қаржылық үнемдеу</h3>
+                <p>Құжаттарды (жеке куәлік, жүргізуші куәлігі) қайта жасатуға кететін мемлекеттік баж салығы мен уақытты үнемдейді.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: IMPACT -->
+    <section class="section" id="impact">
+        <h2 class="section-title">Күтілетін нәтиже</h2>
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">40-50%</div>
+                <div class="stat-label">Иесіне қайту деңгейі<br>арттыру</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Тегін қызмет<br>көрсету</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Күнделікті<br>жұмыс істеу</div>
+            </div>
+        </div>
+        <div class="impact-text">
+            <p><strong>Әлеуметтік маңызы:</strong></p>
+            <ul>
+                <li>Азаматтардың әлеуметтік жауапкершілігін көтеру</li>
+                <li>Қала тұрғындары үшін ыңғайлы, тегін және қауіпсіз цифрлық сервис құру</li>
+                <li>Қазақстанның «Smart City» тұжырымдамасына сай, қалалық мәселелерді IT арқылы тиімді шешуге үлес қосу</li>
+                <li>Қоғамда өзара көмек көрсету мәдениетін қалыптастыру</li>
+                <li>Азаматтардың бір-біріне деген сенімін арттыру</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- SECTION 6: TEAM -->
+    <section class="section" id="team">
+        <h2 class="section-title">Біздің ұжым</h2>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Амамбай Нуржан</h4>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Дженисов Айбар</h4>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Жаңқылыш Темір</h4>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Жомартұлы Жәнібек</h4>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Мырзабеков Бекжан</h4>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">👤</div>
+                <h4>Әділхан Нұрбек</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: CONTACT -->
+    <section class="section" id="contact">
+        <div class="contact-box">
+            <h2>Бізбен байланысыңыз</h2>
+            <p>
+                Бұл жоба тек сайт емес — бұл қала тұрғындарының бір-біріне деген қамқорлығын көрсететін әлеуметтік құрал.
+                Бізбен бірге болыңыз!
+            </p>
+            <a href="#" class="btn">Платформаға өту</a>
+            <p class="footer-text">© 2026 Lost&Found City. Барлық құқықтар қорғалған.</p>
+        </div>
+    </section>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // ================== MAP INIT ==================
+        var map = L.map('map').setView([43.238949, 76.889709], 12);
+
+        // CartoDB Dark Matter — Referer талап етпейді, қараңғы дизайнға сай
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Custom icons
+        var lostIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background:#e74c3c;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        var foundIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background:#2ecc71;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        var pointIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background:#3498db;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        var policeIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="background:#f39c12;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        // Markers data
+        var markers = [
+            // Жоғалған заттар (қызыл)
+            {pos: [43.2380, 76.8820], icon: lostIcon, title: 'Жоғалған: Әйелдер сөмкесі', desc: 'Алматы, Абай даңғылы, метро «Алмалы» жаны. Қара түсті сөмке, ішінде паспорт және ұялы телефон.'},
+            {pos: [43.2520, 76.9120], icon: lostIcon, title: 'Жоғалған: Жүргізуші куәлігі', desc: 'Медеу ауданы, «Шымбұлақ» көтерме жолы жаны. Қазақ тіліндегі жүргізуші куәлігі, иесі: Асанов А.'},
+            {pos: [43.2250, 76.8700], icon: lostIcon, title: 'Жоғалған: Үй кілті', desc: 'Ауэзов ауданы, «Достық» саябағы. Үш кілттің байламы, қызыл түсті брелокпен.'},
+            {pos: [43.2450, 76.9350], icon: lostIcon, title: 'Жоғалған: Мектеп оқулығы', desc: 'Наурызбай ауданы, 173 мектеп жаны. 9-сынып математика оқулығы, иесінің аты: Ерлан.'},
+
+            // Табылған заттар (жасыл)
+            {pos: [43.2350, 76.8950], icon: foundIcon, title: 'Табылды: Паспорт', desc: 'Алматы, Жібек жолы көшесі. Қазақстан Республикасының паспорты, иесі: Қуандықов Б.'},
+            {pos: [43.2600, 76.9000], icon: foundIcon, title: 'Табылды: Үй жануары (мысық)', desc: 'Бостандық ауданы, «Самал» ықшам ауданы. Ақ түсті мысық, мойнында көк түсті ожерелье.'},
+            {pos: [43.2180, 76.8850], icon: foundIcon, title: 'Табылды: Ноутбук', desc: 'Түрксіб ауданы, «Мега» сауда орталығы. HP ноутбугі, қара түсті рюкзакта.'},
+            {pos: [43.2420, 76.9200], icon: foundIcon, title: 'Табылды: Қол сағаты', desc: 'Алмалы ауданы, «Арбат» көшесі. Ерлерге арналған сағат, күміс түсті ремешокпен.'},
+
+            // Тапсыру пункттері (көк)
+            {pos: [43.2400, 76.8900], icon: pointIcon, title: 'Тапсыру пункті: №1', desc: 'Алматы, Панфилов көшесі, 98. «Жібек жолы» сауда үйі, 1-қабат, ақпараттық орталық.'},
+            {pos: [43.2550, 76.9100], icon: pointIcon, title: 'Тапсыру пункті: №2', desc: 'Медеу ауданы, Достық көшесі, 56. «Нұрлытау» бизнес орталығы, қабылдау бөлмесі.'},
+            {pos: [43.2300, 76.8750], icon: pointIcon, title: 'Тапсыру пункті: №3', desc: 'Ауэзов ауданы, Тәуелсіздік даңғылы, 120. «Айналайын» қоғамдық қоры кеңсесі.'},
+
+            // Полиция бөлімдері (сары)
+            {pos: [43.2370, 76.8880], icon: policeIcon, title: 'Полиция: Алмалы РУБ', desc: 'Алматы, Желтоқсан көшесі, 10. Алмалы аудандық полиция басқармасы.'},
+            {pos: [43.2500, 76.9050], icon: policeIcon, title: 'Полиция: Медеу РУБ', desc: 'Медеу ауданы, Қабанбай батыр көшесі, 45. Медеу аудандық полиция басқармасы.'},
+        ];
+
+        markers.forEach(function(m) {
+            L.marker(m.pos, {icon: m.icon})
+                .addTo(map)
+                .bindPopup('<b>' + m.title + '</b><br>' + m.desc);
+        });
+
+        // ================== SCROLL NAVIGATION ==================
+        var sections = document.querySelectorAll('.section');
+        var dots = document.querySelectorAll('.nav-dot');
+        var currentSection = 0;
+        var isScrolling = false;
+
+        function scrollToSection(index) {
+            if (index >= 0 && index < sections.length) {
+                sections[index].scrollIntoView({behavior: 'smooth'});
+                currentSection = index;
+                updateDots();
+            }
+        }
+
+        function updateDots() {
+            dots.forEach(function(dot, i) {
+                dot.classList.toggle('active', i === currentSection);
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                e.preventDefault();
+                scrollToSection(Math.min(currentSection + 1, sections.length - 1));
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                scrollToSection(Math.max(currentSection - 1, 0));
+            }
+        });
+
+        // Scroll detection
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var index = Array.from(sections).indexOf(entry.target);
+                    currentSection = index;
+                    updateDots();
+                }
+            });
+        }, {threshold: 0.5});
+
+        sections.forEach(function(section) {
+            observer.observe(section);
+        });
+
+        // ================== ANIMATIONS ==================
+        var fadeObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {threshold: 0.1});
+
+        document.querySelectorAll('.card, .solution-item, .stat-item, .team-card').forEach(function(el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease';
+            fadeObserver.observe(el);
+        });
+    </script>
+</body>
+</html>
